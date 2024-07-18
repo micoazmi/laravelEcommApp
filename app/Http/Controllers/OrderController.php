@@ -12,41 +12,59 @@ class OrderController extends Controller
      * Store a newly created order with items in storage.
      */
   public function addToCart(Request $request){
-      $validate= $request->validate([
-        'item_id'=>'required|exists:items,id',
-        'item_qty'=>'required|integer|min:1',
-        'item_price'=>'required|numeric',
-        'item_name'=>'required|string|max:255',
-      ]);
-      try {
-                $total_price = $validate['item_price'] * $validate['item_qty'];
-                $orderitem = new Order();
-                $orderitem -> item_id = $validate['item_id'];
-                $orderitem -> total_price = $total_price;
-                $orderitem -> item_qty = $validate['item_qty'];
-                $orderitem -> item_price = $validate['item_price'];
-                $orderitem -> item_name = $validate['item_name'];
-                $orderitem->save();
+        $validate= $request->validate([
+            'item_id'=>'required|exists:items,id',
+            'item_qty'=>'required|integer'
+    ]);
+
+          try {
+            $item = Item::findOrFail($validate['item_id']);
+            $itemQuantity = $validate['item_qty'];
+            $itemPrice=$item->price;
+            $totalPrice=$itemPrice * $itemQuantity;
+
+            $orderItem = new Order();
+            $orderItem->item_id=$item->id;
+            $orderItem->item_qty=$itemQuantity;
+            $orderItem->total_price=$totalPrice;
+
+
+            $orderItem->save();
+            return response()->json(
+                [
+                    'status'=>201,
+                    'message'=>'Item Added to cart',
+                ]
+            );
+
+          } catch (\Exception $e) {
                 return response()->json(
                     [
-                        'status'=>201,
-                        'message'=>'I am in cart'
+                        'status'=>500,
+                        'message'=>'Failed to add item',
+                        'error'=>$e->getMessage()
                     ]
                 );
-      } catch (\Exception $e) {
-        return response()->json(
-            [
-                'status'=>500,
-                'message'=>'Failed to add item',
-                'error'=>$e->getMessage()
-            ]
-        );
-      }
-    
+              }
 
-            
-     
+  }
 
+ 
+
+  public function gerOrdersWithItem(){
+    try {
+        $order = Order::with('item')->get();
+        return response()->json([
+            'status'=>200,
+            'data'=>$order
+        ]);
+    } catch (\Throwable $th) {
+        return response()->json([
+            'status'=>500,
+            'message'=>'failed to retrieve order',
+            'error'=>$th->getMessage()
+        ]);
+    }
   }
 
   public function getAll()

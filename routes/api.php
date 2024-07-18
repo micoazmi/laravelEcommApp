@@ -24,4 +24,5 @@ Route::apiResource('items',ItemController::class);
 Route::post('addToCart',[OrderController::class,'addToCart']);
 Route::get('orders', [OrderController::class, 'getAll']);
 Route::delete('/orders/{id}',[OrderController::class,'deleteOrder']);
+Route::get('/orderWithItem',[OrderController::class,'gerOrdersWithItem']);
 
