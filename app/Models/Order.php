@@ -16,4 +16,9 @@ class Order extends Model
     {
         return $this->belongsTo(Item::class,'item_id','id');
     }
+
+    public function invoices()
+    {
+        return $this->belongsToMany(Invoice::class,'invoice_order');
+    }
 }
